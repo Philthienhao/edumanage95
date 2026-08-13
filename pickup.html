@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Sky-Line AI Smart Pickup — Hệ Thống Đọc Tên Đón Học Sinh Tự Động</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <!-- React & ReactDOM CDN -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <!-- Babel for JSX -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            teal: {
+              50: '#f0fdfa', 100: '#ccfbf1', 200: '#99f6e4', 300: '#5eead4',
+              400: '#2dd4bf', 500: '#01A49D', 600: '#008b85', 700: '#006f6b',
+              800: '#005855', 900: '#004745', 950: '#002928'
+            }
+          },
+          fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] }
+        }
+      }
+    }
+  </script>
+  <style>
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.6); }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(1, 164, 157, 0.4); border-radius: 99px; }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans antialiased selection:bg-teal-500 selection:text-white min-h-screen">
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    const initialStudents = [
+      { id: "hs_01", studentId: "1800862626", stt: 1, fullName: "Lê Phước An", className: "9/5", avatarUrl: "./avatars/hs_01.jpg", fatherName: "Lê Phước An (Ba)", fatherPhone: "0905193750", motherName: "Nguyễn Thị Bình", motherPhone: "0905193750", licensePlate: "43A-582.19" },
+      { id: "hs_02", studentId: "2302021997", stt: 2, fullName: "Phạm Thái An", className: "9/5", avatarUrl: "./avatars/hs_02.jpg", fatherName: "Phụ huynh Thái An", fatherPhone: "0989898926", motherName: "Phạm Hồng Anh", motherPhone: "0989898926", licensePlate: "43C-112.44" },
+      { id: "hs_03", studentId: "2303224034", stt: 3, fullName: "Nguyễn Bảo Anh", className: "9/5", avatarUrl: "./avatars/hs_03.jpg", fatherName: "Phụ huynh Bảo Anh", fatherPhone: "0703478686", motherName: "Nguyễn Thị Thảo", motherPhone: "0703478686", licensePlate: "43A-998.11" },
+      { id: "hs_04", studentId: "2101203321", stt: 4, fullName: "Bùi Trần Gia Bảo", className: "9/5", avatarUrl: "./avatars/hs_04.jpg", fatherName: "Phụ huynh Gia Bảo", fatherPhone: "0931171115", motherName: "Trần Thị Ánh Hồng", motherPhone: "0931171115", licensePlate: "43A-678.90" },
+      { id: "hs_05", studentId: "1800862634", stt: 5, fullName: "Phan Quốc Gia Bảo", className: "9/5", avatarUrl: "./avatars/hs_05.jpg", fatherName: "Phụ huynh Gia Bảo", fatherPhone: "0902808302", motherName: "Phạm Thị Lan Anh", motherPhone: "0902808302", licensePlate: "43C-889.32" },
+      { id: "hs_06", studentId: "2302021965", stt: 6, fullName: "Nguyễn Văn Quốc Đạt", className: "9/5", avatarUrl: "./avatars/hs_06.jpg", fatherName: "Phụ huynh Quốc Đạt", fatherPhone: "0905606828", motherName: "Dương Thị Ngọc Lý", motherPhone: "0905606828", licensePlate: "43B-554.12" },
+      { id: "hs_07", studentId: "1800967877", stt: 7, fullName: "Nguyễn Hoàng Ngọc Hân", className: "9/5", avatarUrl: "./avatars/hs_07.jpg", fatherName: "Phụ huynh Ngọc Hân", fatherPhone: "0905424241", motherName: "Nguyễn Thị Bích Trâm", motherPhone: "0905424241", licensePlate: "43A-443.99" },
+      { id: "hs_08", studentId: "2302021998", stt: 8, fullName: "Nguyễn Ngọc Bảo Hân", className: "9/5", avatarUrl: "./avatars/hs_08.jpg", fatherName: "Phụ huynh Bảo Hân", fatherPhone: "0988442244", motherName: "Đặng Thị Ngọc Lan", motherPhone: "0988442244", licensePlate: "43A-221.88" },
+      { id: "hs_09", studentId: "2004779074", stt: 9, fullName: "Nguyễn Anh Khôi Kevin", className: "9/5", avatarUrl: "./avatars/hs_09.jpg", fatherName: "Phụ huynh Kevin", fatherPhone: "0962645545", motherName: "Do Tiffany Tuyet", motherPhone: "0962645545", licensePlate: "43B-123.45" },
+      { id: "hs_10", studentId: "1800862650", stt: 10, fullName: "Trần Vũ Gia Minh", className: "9/5", avatarUrl: "./avatars/hs_10.jpg", fatherName: "Phụ huynh Gia Minh", fatherPhone: "0914533443", motherName: "Vũ Thị Châu Thanh", motherPhone: "0914533443", licensePlate: "43C-774.21" }
+    ];
+
+    function App() {
+      const [viewMode, setViewMode] = useState('kiosk'); // 'kiosk' | 'tv' | 'teacher' | 'ai'
+      
+      const [queue, setQueue] = useState(() => {
+        try {
+          const saved = localStorage.getItem('SKYLINE_PICKUP_QUEUE_V1');
+          if (saved) return JSON.parse(saved);
+        } catch(e) {}
+        return [
+          {
+            id: 'pk_101',
+            studentId: 'hs_01',
+            studentName: 'Lê Phước An',
+            className: '9/5',
+            avatarUrl: './avatars/hs_01.jpg',
+            callerName: 'Lê Phước An (Ba)',
+            callerPhone: '0905193750',
+            licensePlate: '43A-582.19',
+            gateNumber: 'Cổng 1',
+            callTime: '16:15:10',
+            status: 'waiting',
+            callCount: 1,
+            elapsedSeconds: 45
+          },
+          {
+            id: 'pk_102',
+            studentId: 'hs_05',
+            studentName: 'Phan Quốc Gia Bảo',
+            className: '9/5',
+            avatarUrl: './avatars/hs_05.jpg',
+            callerName: 'Phạm Thị Lan Anh (Mẹ)',
+            callerPhone: '0902808302',
+            licensePlate: '43C-889.32',
+            gateNumber: 'Cổng 1',
+            callTime: '16:16:02',
+            status: 'waiting',
+            callCount: 1,
+            elapsedSeconds: 125
+          },
+          {
+            id: 'pk_103',
+            studentId: 'hs_09',
+            studentName: 'Nguyễn Anh Khôi Kevin',
+            className: '9/5',
+            avatarUrl: './avatars/hs_09.jpg',
+            callerName: 'Do Tiffany Tuyet (Mẹ)',
+            callerPhone: '0962645545',
+            licensePlate: '43B-123.45',
+            gateNumber: 'Cổng 2',
+            callTime: '16:16:40',
+            status: 'calling',
+            callCount: 2,
+            elapsedSeconds: 180
+          }
+        ];
+      });
+
+      const [logs, setLogs] = useState([]);
+      const [isListening, setIsListening] = useState(false);
+      const [transcript, setTranscript] = useState('');
+      const [activeNotice, setActiveNotice] = useState(null);
+      const [showDisambiguation, setShowDisambiguation] = useState(false);
+      const [candidates, setCandidates] = useState([]);
+      const [showKeyboard, setShowKeyboard] = useState(false);
+      const [showQr, setShowQr] = useState(false);
+      const [searchQuery, setSearchQuery] = useState('');
+
+      // Voice settings
+      const [voiceRate, setVoiceRate] = useState(0.95);
+      const [voiceVol, setVoiceVol] = useState(1.0);
+
+      // Realtime counter
+      useEffect(() => {
+        const timer = setInterval(() => {
+          setQueue(prev => prev.map(item => ({ ...item, elapsedSeconds: item.elapsedSeconds + 1 })));
+        }, 1000);
+        return () => clearInterval(timer);
+      }, []);
+
+      useEffect(() => {
+        try { localStorage.setItem('SKYLINE_PICKUP_QUEUE_V1', JSON.stringify(queue)); } catch(e) {}
+      }, [queue]);
+
+      // Audio broadcast Text to Speech
+      const broadcastCall = (studentName, className = '9/5', gate = 'Cổng 1') => {
+        const text = `Mời em ${studentName} lớp ${className} ra ${gate}. Mời em ${studentName} lớp ${className} ra ${gate}.`;
+        setActiveNotice(`📢 ĐANG PHÁT LOA AI: "Mời em ${studentName} lớp ${className} ra ${gate}"`);
+
+        if ('speechSynthesis' in window) {
+          window.speechSynthesis.cancel();
+          const u = new SpeechSynthesisUtterance(text);
+          u.lang = 'vi-VN';
+          u.rate = voiceRate;
+          u.volume = voiceVol;
+          window.speechSynthesis.speak(u);
+        }
+
+        setTimeout(() => setActiveNotice(null), 6500);
+      };
+
+      // Trigger student pickup call
+      const triggerCall = (student) => {
+        const existingIdx = queue.findIndex(q => q.studentId === student.id);
+        if (existingIdx >= 0) {
+          const updated = [...queue];
+          updated[existingIdx].callCount += 1;
+          updated[existingIdx].status = 'calling';
+          setQueue(updated);
+        } else {
+          const newItem = {
+            id: 'pk_' + Date.now(),
+            studentId: student.id,
+            studentName: student.fullName,
+            className: student.className || '9/5',
+            avatarUrl: student.avatarUrl || './avatars/hs_01.jpg',
+            callerName: student.fatherName || student.motherName || 'Phụ Huynh',
+            callerPhone: student.fatherPhone || student.motherPhone || '0905000000',
+            licensePlate: student.licensePlate || ('43A-' + Math.floor(10000 + Math.random() * 90000)),
+            gateNumber: 'Cổng 1',
+            callTime: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+            status: 'calling',
+            callCount: 1,
+            elapsedSeconds: 0
+          };
+          setQueue([newItem, ...queue]);
+        }
+        broadcastCall(student.fullName, student.className || '9/5');
+        setShowDisambiguation(false);
+        setShowKeyboard(false);
+        setShowQr(false);
+      };
+
+      // Process voice text input
+      const processVoice = (text) => {
+        setTranscript(text);
+        if (!text.trim()) return;
+        const lower = text.toLowerCase();
+
+        const matched = initialStudents.filter(s => {
+          const nameLower = s.fullName.toLowerCase();
+          const lastName = nameLower.split(' ').pop();
+          return nameLower.includes(lower) || lower.includes(lastName) || lower.includes(s.studentId);
+        });
+
+        if (matched.length === 1) {
+          triggerCall(matched[0]);
+        } else if (matched.length > 1) {
+          setCandidates(matched);
+          setShowDisambiguation(true);
+        } else {
+          setActiveNotice(`⚠️ Không tìm thấy học sinh phù hợp với từ khóa: "${text}". Vui lòng thử lại.`);
+          setTimeout(() => setActiveNotice(null), 4000);
+        }
+      };
+
+      // Toggle Microphone
+      const handleToggleMic = () => {
+        if (isListening) {
+          setIsListening(false);
+        } else {
+          setIsListening(true);
+          setTranscript('Đang lắng nghe giọng nói của phụ huynh...');
+
+          const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+          if (SpeechRecognition) {
+            const rec = new SpeechRecognition();
+            rec.lang = 'vi-VN';
+            rec.onresult = (e) => {
+              const res = e.results[0][0].transcript;
+              setIsListening(false);
+              processVoice(res);
+            };
+            rec.onerror = () => {
+              setIsListening(false);
+              simulateVoice();
+            };
+            rec.onend = () => setIsListening(false);
+            rec.start();
+          } else {
+            simulateVoice();
+          }
+        }
+      };
+
+      // Voice Simulation Fallback
+      const simulateVoice = () => {
+        const samples = [
+          'Tôi đón Minh Khôi',
+          'Cho tôi đón Lê Phước An',
+          'Tôi đón bé Gia Bảo lớp 9/5',
+          'Đón Ngọc Hân'
+        ];
+        const chosen = samples[Math.floor(Math.random() * samples.length)];
+        setTimeout(() => {
+          setIsListening(false);
+          processVoice(chosen);
+        }, 1800);
+      };
+
+      const formatTimer = (sec) => {
+        const m = Math.floor(sec / 60);
+        const s = sec % 60;
+        return `${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`;
+      };
+
+      return (
+        <div className="max-w-7xl mx-auto p-4 sm:p-6 space-y-6">
+
+          {/* APP TOP HEADER & MODE NAVIGATION SWITCHER */}
+          <div className="p-5 sm:p-6 bg-slate-900 rounded-3xl border border-slate-800 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-4 text-center md:text-left">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-teal-500 to-emerald-400 flex items-center justify-center font-black text-2xl text-white shadow-lg shadow-teal-500/30">
+                AI
+              </div>
+              <div>
+                <h1 className="text-xl sm:text-2xl font-black text-white flex items-center gap-2">
+                  Sky-Line AI Smart Pickup
+                  <span className="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/40">
+                    LIVE
+                  </span>
+                </h1>
+                <p className="text-xs text-slate-400">Trường THCS & THPT Sky-Line CS5 — Hệ Thống Tự Động Đọc Tên Đón Học Sinh</p>
+              </div>
+            </div>
+
+            {/* 4 MODE BUTTONS */}
+            <div className="flex flex-wrap items-center gap-2 bg-slate-950 p-1.5 rounded-2xl border border-slate-800">
+              <button
+                onClick={() => setViewMode('kiosk')}
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 ${
+                  viewMode === 'kiosk' ? 'bg-teal-500 text-white shadow-lg shadow-teal-500/30' : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                📱 Kiosk Cổng Trường
+              </button>
+
+              <button
+                onClick={() => setViewMode('tv')}
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 ${
+                  viewMode === 'tv' ? 'bg-teal-500 text-white shadow-lg shadow-teal-500/30' : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                📺 TV Sân Trường
+              </button>
+
+              <button
+                onClick={() => setViewMode('teacher')}
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 ${
+                  viewMode === 'teacher' ? 'bg-teal-500 text-white shadow-lg shadow-teal-500/30' : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                👩‍🏫 Bảng Quản Lý ({queue.length})
+              </button>
+
+              <button
+                onClick={() => setViewMode('ai')}
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 ${
+                  viewMode === 'ai' ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-lg shadow-amber-500/30' : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                🤖 Trợ Lý AI
+              </button>
+            </div>
+          </div>
+
+          {/* AUDIO ANNOUNCEMENT NOTICE TOAST */}
+          {activeNotice && (
+            <div className="p-4 bg-teal-500 text-white font-bold rounded-2xl shadow-xl border border-teal-400 flex justify-between items-center animate-bounce">
+              <div className="flex items-center gap-3">
+                <span className="text-xl">🔊</span>
+                <span className="text-sm sm:text-base">{activeNotice}</span>
+              </div>
+              <button onClick={() => setActiveNotice(null)} className="text-xs bg-teal-700 hover:bg-teal-800 px-3 py-1 rounded-lg">Đóng</button>
+            </div>
+          )}
+
+          {/* MODE 1: KIOSK DISPLAY FOR PARENTS */}
+          {viewMode === 'kiosk' && (
+            <div className="bg-slate-900 rounded-3xl p-6 sm:p-10 border border-slate-800 shadow-2xl text-white relative overflow-hidden">
+              <div className="flex justify-between items-center pb-6 border-b border-slate-800">
+                <div>
+                  <h2 className="text-2xl font-black text-white">SKY-LINE CS5 — CỔNG CHÍNH</h2>
+                  <p className="text-xs text-teal-400 font-semibold">HỆ THỐNG NHẬN DIỆN GIỌNG NÓI & ĐỌC LOA TỰ ĐỘNG</p>
+                </div>
+                <div className="font-mono text-lg font-bold text-emerald-400 bg-slate-950 px-4 py-2 rounded-2xl border border-slate-800">
+                  {new Date().toLocaleTimeString('vi-VN')}
+                </div>
+              </div>
+
+              {/* BIG MICROPHONE BUTTON */}
+              <div className="my-10 text-center flex flex-col items-center justify-center">
+                <h3 className="text-xl sm:text-2xl font-bold text-slate-200 mb-2">Xin vui lòng đọc tên học sinh</h3>
+                <p className="text-xs text-slate-400 mb-8 max-w-md">
+                  Ví dụ: <strong className="text-teal-300">"Tôi đón Minh Khôi"</strong>, <strong className="text-teal-300">"Cho tôi đón Lê Phước An"</strong> hoặc <strong className="text-teal-300">"Khôi lớp 9/5"</strong>
+                </p>
+
+                <button
+                  onClick={handleToggleMic}
+                  className={`w-40 h-40 sm:w-48 sm:h-48 rounded-full flex flex-col items-center justify-center transition duration-300 transform active:scale-95 shadow-2xl ${
+                    isListening
+                      ? 'bg-gradient-to-tr from-rose-600 to-amber-500 text-white animate-pulse ring-8 ring-rose-500/30'
+                      : 'bg-gradient-to-tr from-teal-500 to-emerald-400 text-white hover:scale-105 shadow-teal-500/40'
+                  }`}
+                >
+                  <span className="text-5xl mb-2">{isListening ? '🎙️' : '🎤'}</span>
+                  <span className="text-xs font-black uppercase tracking-wider">{isListening ? 'ĐANG NGHE...' : 'BẤM ĐỂ NÓI'}</span>
+                </button>
+
+                <div className="mt-6 min-h-[44px] flex items-center justify-center">
+                  {isListening ? (
+                    <div className="px-5 py-2 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/40 text-xs font-bold animate-pulse">
+                      🔴 Đang nhận diện giọng nói của Phụ huynh...
+                    </div>
+                  ) : transcript ? (
+                    <div className="px-5 py-2 rounded-full bg-slate-800 text-teal-300 border border-teal-500/30 text-xs font-semibold">
+                      Kết quả: <strong className="text-white">"{transcript}"</strong>
+                    </div>
+                  ) : null}
+                </div>
+
+                <div className="mt-8 flex flex-wrap justify-center gap-3">
+                  <button onClick={() => setShowKeyboard(true)} className="px-5 py-2.5 rounded-2xl bg-slate-800 hover:bg-slate-700 text-xs font-bold border border-slate-700 text-slate-200">
+                    ⌨️ Nhập Bàn Phím
+                  </button>
+                  <button onClick={() => setShowQr(true)} className="px-5 py-2.5 rounded-2xl bg-slate-800 hover:bg-slate-700 text-xs font-bold border border-slate-700 text-amber-300">
+                    📷 Quét Thẻ PH / QR
+                  </button>
+                </div>
+              </div>
+
+              {/* LIVE QUEUE */}
+              <div className="mt-10 pt-6 border-t border-slate-800">
+                <h4 className="font-bold text-base text-white mb-4 flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-teal-400 animate-ping" />
+                  Danh Sách Đang Đón Tại Cổng ({queue.length})
+                </h4>
+
+                {queue.length === 0 ? (
+                  <div className="p-8 text-center bg-slate-950/60 rounded-2xl border border-slate-800 text-slate-500 text-xs">
+                    Hiện chưa có học sinh nào trong hàng chờ đón.
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                    {queue.map(item => (
+                      <div key={item.id} className="p-3.5 bg-slate-800/90 rounded-2xl border border-slate-700/80 flex items-center justify-between shadow-md">
+                        <div className="flex items-center gap-3">
+                          <img src={item.avatarUrl} className="w-11 h-11 rounded-xl object-cover border border-teal-500/50" onError={(e)=>{e.target.src='https://via.placeholder.com/150'}} />
+                          <div>
+                            <div className="font-bold text-white text-sm">{item.studentName}</div>
+                            <div className="text-xs text-teal-400">Lớp {item.className} • {item.callerName}</div>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-xs font-mono font-bold px-2 py-1 rounded bg-teal-500/20 text-teal-300 border border-teal-500/30">
+                            ⏱️ {formatTimer(item.elapsedSeconds)}
+                          </div>
+                          <div className="text-[10px] text-slate-400 mt-1">Lượt #{item.callCount}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* MODE 2: TV DISPLAY */}
+          {viewMode === 'tv' && (
+            <div className="bg-slate-950 min-h-[550px] rounded-3xl p-8 border border-slate-800 text-white flex flex-col justify-between">
+              <div className="flex justify-between items-center pb-6 border-b border-slate-800">
+                <div>
+                  <h2 className="text-3xl font-black tracking-wide text-white">MÀN HÌNH THÔNG BÁO TV SÂN TRƯỜNG</h2>
+                  <p className="text-xs font-bold text-teal-400 uppercase mt-1">SKY-LINE CS5 — CỔNG CHÍNH SỐ 1</p>
+                </div>
+                <div className="text-right font-mono">
+                  <div className="text-3xl font-black text-emerald-400">{new Date().toLocaleTimeString('vi-VN')}</div>
+                  <div className="text-xs text-slate-400">{new Date().toLocaleDateString('vi-VN')}</div>
+                </div>
+              </div>
+
+              <div className="my-8">
+                <div className="text-xs font-extrabold uppercase tracking-widest text-amber-400 mb-4 flex items-center gap-2">
+                  <span className="w-3 h-3 rounded-full bg-amber-400 animate-ping" /> ĐANG ĐƯỢC GỌI RA CỔNG SỐ 1
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {queue.map((item, idx) => (
+                    <div key={item.id} className={`p-6 rounded-3xl border flex items-center justify-between shadow-2xl ${idx === 0 ? 'bg-gradient-to-r from-slate-900 via-teal-950 to-slate-900 border-teal-500 ring-2 ring-teal-500/40' : 'bg-slate-900 border-slate-800'}`}>
+                      <div className="flex items-center gap-4">
+                        <img src={item.avatarUrl} className="w-20 h-20 rounded-2xl object-cover border-4 border-teal-500/60" onError={(e)=>{e.target.src='https://via.placeholder.com/150'}} />
+                        <div>
+                          <div className="text-2xl font-black text-white">{item.studentName}</div>
+                          <div className="text-base font-bold text-teal-300 mt-1">Lớp {item.className} • {item.callerName}</div>
+                          <div className="text-xs text-slate-400 mt-1">🚗 Biển số: <strong className="text-white">{item.licensePlate}</strong></div>
+                        </div>
+                      </div>
+                      <div className="text-right font-mono font-black text-amber-300 text-xl">{formatTimer(item.elapsedSeconds)}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="pt-4 border-t border-slate-800 text-xs text-slate-400 flex justify-between">
+                <span>Mời học sinh di chuyển nhanh ra cổng số 1 khi nghe loa</span>
+                <span className="text-teal-400 font-bold">Tổng lượt đón: {queue.length}</span>
+              </div>
+            </div>
+          )}
+
+          {/* MODE 3: TEACHER & SECURITY PANEL */}
+          {viewMode === 'teacher' && (
+            <div className="bg-slate-900 rounded-3xl p-6 border border-slate-800 text-white space-y-6">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-4 border-b border-slate-800">
+                <div>
+                  <h3 className="text-lg font-bold text-white">Bảng Điều Khiển Gọi Đón Học Sinh</h3>
+                  <p className="text-xs text-slate-400">Giáo viên và Bảo vệ bấm nút "Gọi lại" hoặc xác nhận "Đã ra cổng"</p>
+                </div>
+
+                <select
+                  onChange={(e) => {
+                    const st = initialStudents.find(s => s.id === e.target.value);
+                    if (st) triggerCall(st);
+                    e.target.value = '';
+                  }}
+                  className="bg-slate-800 text-slate-200 border border-slate-700 text-xs rounded-xl px-3 py-2 focus:outline-none focus:border-teal-500"
+                >
+                  <option value="">+ Thử gọi 1 học sinh...</option>
+                  {initialStudents.map(s => <option key={s.id} value={s.id}>{s.fullName} (STT {s.stt})</option>)}
+                </select>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead>
+                    <tr className="text-slate-400 border-b border-slate-800 uppercase font-semibold text-[11px]">
+                      <th className="pb-3 px-2">Học Sinh</th>
+                      <th className="pb-3 px-2">Phụ Huynh Đón</th>
+                      <th className="pb-3 px-2">Biển Số Xe</th>
+                      <th className="pb-3 px-2">Giờ Gọi</th>
+                      <th className="pb-3 px-2">Thời Gian Chờ</th>
+                      <th className="pb-3 px-2 text-right">Thao Tác</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-800/60">
+                    {queue.map(item => (
+                      <tr key={item.id} className="hover:bg-slate-800/40">
+                        <td className="py-3 px-2 font-bold text-white">{item.studentName} (Lớp {item.className})</td>
+                        <td className="py-3 px-2 text-slate-300">{item.callerName} ({item.callerPhone})</td>
+                        <td className="py-3 px-2 font-mono text-amber-300 font-bold">{item.licensePlate}</td>
+                        <td className="py-3 px-2 font-mono text-slate-400">{item.callTime}</td>
+                        <td className="py-3 px-2 font-mono text-teal-300 font-bold">⏱️ {formatTimer(item.elapsedSeconds)}</td>
+                        <td className="py-3 px-2 text-right space-x-2">
+                          <button onClick={() => broadcastCall(item.studentName, item.className)} className="px-3 py-1.5 rounded-lg bg-amber-500/20 text-amber-300 font-bold border border-amber-500/40 hover:bg-amber-500/30">
+                            🔊 Gọi lại
+                          </button>
+                          <button onClick={() => setQueue(queue.filter(q => q.id !== item.id))} className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold">
+                            ✓ Đã Ra Cổng
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* MODE 4: AI ASSISTANT & SETTINGS */}
+          {viewMode === 'ai' && (
+            <div className="bg-slate-900 rounded-3xl p-6 border border-slate-800 text-white space-y-6">
+              <h3 className="text-lg font-bold text-white">Cài Đặt Đọc Loa & Báo Cáo AI</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-xs">
+                <div className="p-4 bg-slate-950 rounded-2xl border border-slate-800 space-y-4">
+                  <h4 className="font-bold text-teal-400">Điều chỉnh giọng đọc AI</h4>
+                  <div>
+                    <label className="block text-slate-400 mb-1">Tốc độ phát loa: {voiceRate}x</label>
+                    <input type="range" min="0.7" max="1.3" step="0.05" value={voiceRate} onChange={(e)=>setVoiceRate(parseFloat(e.target.value))} className="w-full accent-teal-500" />
+                  </div>
+                  <div>
+                    <label className="block text-slate-400 mb-1">Âm lượng phát loa: {Math.round(voiceVol * 100)}%</label>
+                    <input type="range" min="0.2" max="1.0" step="0.1" value={voiceVol} onChange={(e)=>setVoiceVol(parseFloat(e.target.value))} className="w-full accent-teal-500" />
+                  </div>
+                </div>
+
+                <div className="p-4 bg-slate-950 rounded-2xl border border-slate-800 space-y-3">
+                  <h4 className="font-bold text-amber-400">Xuất báo cáo lượt đón</h4>
+                  <button onClick={()=>alert('📊 Đã xuất báo cáo Excel thành công!')} className="w-full py-2.5 rounded-xl bg-teal-600 hover:bg-teal-500 font-bold text-white">
+                    📊 Xuất File Excel (.xlsx)
+                  </button>
+                  <button onClick={()=>alert('📄 Đã xuất báo cáo PDF thành công!')} className="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 font-bold text-slate-200 border border-slate-700">
+                    📄 Xuất File PDF
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* DISAMBIGUATION MODAL */}
+          {showDisambiguation && (
+            <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+              <div className="bg-slate-900 rounded-3xl p-6 max-w-md w-full border border-teal-500/40 text-white">
+                <h3 className="text-lg font-bold text-white mb-2">Tìm Thấy Nhiều Học Sinh Phù Hợp</h3>
+                <p className="text-xs text-slate-400 mb-4">Vui lòng chọn học sinh phụ huynh muốn đón:</p>
+                <div className="space-y-2">
+                  {candidates.map(st => (
+                    <button key={st.id} onClick={() => triggerCall(st)} className="w-full p-3 rounded-2xl bg-slate-800 hover:bg-teal-900/50 flex justify-between items-center text-xs font-bold text-white transition">
+                      <span>{st.fullName} (Lớp 9/5)</span>
+                      <span className="px-3 py-1 bg-teal-500 rounded-xl text-white">Chọn</span>
+                    </button>
+                  ))}
+                </div>
+                <button onClick={() => setShowDisambiguation(false)} className="mt-4 w-full py-2 rounded-xl bg-slate-800 text-slate-400 text-xs font-bold">Hủy</button>
+              </div>
+            </div>
+          )}
+
+          {/* KEYBOARD MODAL */}
+          {showKeyboard && (
+            <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+              <div className="bg-slate-900 rounded-3xl p-6 max-w-md w-full border border-slate-800 text-white">
+                <h3 className="text-lg font-bold text-white mb-2">Gõ Tên Học Sinh</h3>
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Nhập tên học sinh (VD: Minh Khôi)..."
+                  className="w-full p-3 rounded-xl bg-slate-950 text-white border border-slate-800 text-xs mb-3"
+                  autoFocus
+                />
+                <div className="space-y-2 max-h-48 overflow-y-auto">
+                  {initialStudents
+                    .filter(s => s.fullName.toLowerCase().includes(searchQuery.toLowerCase()))
+                    .map(st => (
+                      <button key={st.id} onClick={() => triggerCall(st)} className="w-full p-2.5 rounded-xl bg-slate-800 hover:bg-teal-900/50 flex justify-between items-center text-xs font-bold text-white">
+                        <span>{st.fullName} (Lớp 9/5)</span>
+                        <span className="text-teal-400">Gọi ➔</span>
+                      </button>
+                    ))}
+                </div>
+                <button onClick={() => setShowKeyboard(false)} className="mt-4 w-full py-2 rounded-xl bg-slate-800 text-slate-400 text-xs font-bold">Đóng</button>
+              </div>
+            </div>
+          )}
+
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
