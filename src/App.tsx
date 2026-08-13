@@ -384,6 +384,23 @@ export function App() {
   };
 
 
+  
+  const handleDeleteStudent = (id: string) => {
+    if (confirm("🗑️ XÓA học sinh này khỏi danh sách?")) {
+      setStudents(students.filter((s: any) => s.id !== id));
+      if (selectedStudent && selectedStudent.id === id) setSelectedStudent(null);
+    }
+  };
+
+  const handleDeleteReward = (id: string) => setRewards(rewards.filter((r: any) => r.id !== id));
+  const handleDeleteViolation = (id: string) => setViolations(violations.filter((v: any) => v.id !== id));
+  const handleDeleteDecline = (id: string) => setAcademicDeclineList(academicDeclineList.filter((ad: any) => ad.id !== id));
+  const handleDeleteRepeatedViolation = (studentId: string, type: string) => {
+    if (confirm("🗑️ XÓA cảnh báo vi phạm lặp lỗi này của học sinh?")) {
+      setViolations(violations.filter((v: any) => !(v.studentId === studentId && v.type === type)));
+    }
+  };
+
   const today = new Date();
   const currentMonth = today.getMonth() + 1;
   const birthdayStudentsThisMonth = useMemo(() => {
