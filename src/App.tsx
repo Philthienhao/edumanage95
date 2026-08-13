@@ -214,6 +214,103 @@ export function App() {
     try { localStorage.setItem("EDUMANAGE_ACADEMIC_DECLINE_DATA", JSON.stringify(academicDeclineList)); } catch(e) {}
   }, [academicDeclineList]);
 
+    // ☁️ REAL-TIME 2-WAY CLOUD SYNC ENGINE (iPhone 📱 ⇄ Laptop 💻)
+  const GITHUB_TOKEN = "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";
+  const GITHUB_REPO_API = "https://api.github.com/repos/Philthienhao/edumanage95/contents/cloud_data.json";
+
+  const [syncStatus, setSyncStatus] = useState<"synced" | "syncing" | "offline">("synced");
+  const [lastSyncedTime, setLastSyncedTime] = useState<string>("");
+
+  const syncPushToCloud = async (studentsData: any, rewardsData: any, violationsData: any, declineData: any) => {
+    try {
+      setSyncStatus("syncing");
+      let sha = "";
+      try {
+        const getRes = await fetch(GITHUB_REPO_API, {
+          headers: {
+            "Authorization": `token ${GITHUB_TOKEN}`,
+            "Accept": "application/vnd.github.v3+json"
+          }
+        });
+        if (getRes.ok) {
+          const getData = await getRes.json();
+          sha = getData.sha;
+        }
+      } catch(e) {}
+
+      const payload = {
+        updatedAt: new Date().toISOString(),
+        students: studentsData,
+        rewards: rewardsData,
+        violations: violationsData,
+        academicDeclineList: declineData
+      };
+
+      const b64Content = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+      const bodyPayload: any = {
+        message: "☁️ EduManage 9/5 Auto Cloud Sync Update",
+        content: b64Content
+      };
+      if (sha) bodyPayload.sha = sha;
+
+      const putRes = await fetch(GITHUB_REPO_API, {
+        method: "PUT",
+        headers: {
+          "Authorization": `token ${GITHUB_TOKEN}`,
+          "Accept": "application/vnd.github.v3+json",
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(bodyPayload)
+      });
+
+      if (putRes.ok) {
+        setSyncStatus("synced");
+        setLastSyncedTime(new Date().toLocaleTimeString("vi-VN"));
+      }
+    } catch(err) {
+      console.warn("Cloud push error:", err);
+      setSyncStatus("offline");
+    }
+  };
+
+  const syncPullFromCloud = async () => {
+    try {
+      setSyncStatus("syncing");
+      const res = await fetch(GITHUB_REPO_API, {
+        headers: {
+          "Authorization": `token ${GITHUB_TOKEN}`,
+          "Accept": "application/vnd.github.v3+json"
+        }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.content) {
+          const decodedStr = decodeURIComponent(escape(atob(data.content.replace(/\n/g, ""))));
+          const parsed = JSON.parse(decodedStr);
+          if (parsed && parsed.students && Array.isArray(parsed.students) && parsed.students.length > 0) {
+            setStudents(parsed.students.map(sanitizeStudent));
+            if (parsed.rewards) setRewards(parsed.rewards);
+            if (parsed.violations) setViolations(parsed.violations);
+            if (parsed.academicDeclineList) setAcademicDeclineList(parsed.academicDeclineList);
+            setSyncStatus("synced");
+            setLastSyncedTime(new Date().toLocaleTimeString("vi-VN"));
+          }
+        }
+      }
+    } catch(err) {
+      console.warn("Cloud pull error:", err);
+      setSyncStatus("offline");
+    }
+  };
+
+  useEffect(() => {
+    syncPullFromCloud();
+    const interval = setInterval(() => {
+      syncPullFromCloud();
+    }, 15000);
+    return () => clearInterval(interval);
+  }, []);
+
   const [selectedStudent, setSelectedStudent] = useState<any>(null);
   const [editingPrivateNote, setEditingPrivateNote] = useState<string>('');
   const [modalTab, setModalTab] = useState<'violations' | 'rewards'>('violations');
@@ -281,7 +378,7 @@ export function App() {
             setSelectedStudent((prev: any) => (prev ? { ...prev, avatarUrl: compressedBase64 } : null));
           }
 
-          alert("✅ Đã tối ưu và lưu ảnh đại diện mới thành công vĩnh viễn trên iPhone!");
+          alert("✅ Đã tối ưu và lưu ảnh đại diện mới thành công vĩnh viễn trên iPhone!"); syncPushToCloud(updated, rewards, violations, academicDeclineList);
         }
       };
       img.src = event.target.result;
@@ -343,7 +440,7 @@ export function App() {
         localStorage.setItem("EDUMANAGE_VIOLATIONS_DATA", JSON.stringify([]));
         localStorage.setItem("EDUMANAGE_ACADEMIC_DECLINE_DATA", JSON.stringify([]));
       } catch(e) {}
-      alert("✅ Đã reset xóa toàn bộ dữ liệu khen thưởng và vi phạm thành công!");
+      alert("✅ Đã reset xóa toàn bộ dữ liệu khen thưởng và vi phạm thành công!"); syncPushToCloud(students, [], [], []);
     }
   };
 
@@ -357,7 +454,7 @@ export function App() {
         localStorage.setItem("EDUMANAGE_VIOLATIONS_DATA", JSON.stringify(initialViolations));
         localStorage.setItem("EDUMANAGE_ACADEMIC_DECLINE_DATA", JSON.stringify(initialAcademicDecline));
       } catch(e) {}
-      alert("✅ Đã khôi phục dữ liệu khen thưởng và vi phạm ban đầu thành công!");
+      alert("✅ Đã khôi phục dữ liệu khen thưởng và vi phạm ban đầu thành công!"); syncPushToCloud(students, initialRewards, initialViolations, initialAcademicDecline);
     }
   };
 
