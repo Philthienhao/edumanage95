@@ -1,3 +1,6 @@
+import { LoginModal } from "./components/auth/LoginModal";
+import { TeacherManagementModal } from "./components/admin/TeacherManagementModal";
+import { TeacherUser } from "./types";
 import { AppProvider } from "./context/AppContext";
 
 
@@ -216,7 +219,7 @@ export function App() {
 
     // ☁️ REAL-TIME 2-WAY CLOUD SYNC ENGINE (iPhone 📱 ⇄ Laptop 💻)
   const GITHUB_TOKEN = "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";
-  const GITHUB_REPO_API = "https://api.github.com/repos/Philthienhao/edumanage95/contents/cloud_data.json";
+  const GITHUB_REPO_API = `https://api.github.com/repos/Philthienhao/edumanage95/contents/cloud_data_${currentTeacher.classCode}.json`;
 
   const [syncStatus, setSyncStatus] = useState<"synced" | "syncing" | "offline">("synced");
   const [lastSyncedTime, setLastSyncedTime] = useState<string>("");
@@ -330,7 +333,32 @@ export function App() {
   }, [selectedStudent]);
 
   
-      const handleUploadStudentAvatar = (e: React.ChangeEvent<HTMLInputElement>, studentId: string) => {
+      
+  const handleAddTeacher = (newTeacher: TeacherUser) => {
+    setTeachersList([...teachersList, newTeacher]);
+    alert("✅ Đã tạo mới thành công tài khoản GVCN " + newTeacher.name + " (" + newTeacher.className + ")!");
+  };
+
+  const handleUpdateTeacher = (updated: TeacherUser) => {
+    setTeachersList(teachersList.map(t => t.id === updated.id ? updated : t));
+    if (currentTeacher.id === updated.id) {
+      setCurrentTeacher(updated);
+    }
+    alert("✅ Đã cập nhật thành công tài khoản của " + updated.name + "!");
+  };
+
+  const handleDeleteTeacher = (id: string) => {
+    setTeachersList(teachersList.filter(t => t.id !== id));
+    alert("✅ Đã xóa tài khoản GVCN khỏi hệ thống!");
+  };
+
+  const handleSwitchTeacher = (teacher: TeacherUser) => {
+    setCurrentTeacher(teacher);
+    setShowLoginModal(false);
+    alert("🔓 Đã chuyển sang tài khoản " + teacher.name + " (GVCN " + teacher.className + ") thành công!");
+  };
+
+  const handleUploadStudentAvatar = (e: React.ChangeEvent<HTMLInputElement>, studentId: string) => {
     const file = e.target.files && e.target.files[0];
     if (!file) return;
 
@@ -581,34 +609,58 @@ export function App() {
           </nav>
         </div>
 
-        <div className="border-t border-slate-800 pt-3 flex items-center gap-2.5">
-          <img src={teacherProfile.avatar} className="w-9 h-9 rounded-full object-cover border border-teal-500 shadow-md" alt="Teacher" />
-          <div className="text-[11px]">
-            <div className="font-bold text-white">{teacherProfile.name}</div>
-            <div className="text-[9px] text-teal-400">GVCN Lớp 9/5_CS5</div>
+                <div className="border-t border-slate-800 pt-3 space-y-2">
+          <div className="flex items-center gap-2.5">
+            <img src={currentTeacher.avatarUrl || teacherProfile.avatar} className="w-9 h-9 rounded-full object-cover border border-teal-500 shadow-md" alt="Teacher" />
+            <div className="text-[11px]">
+              <div className="font-bold text-white flex items-center gap-1">
+                <span>{currentTeacher.name}</span>
+                {currentTeacher.role === "admin" && <span className="px-1 py-0.2 bg-amber-500/20 text-amber-300 text-[8px] rounded font-bold">ADMIN</span>}
+              </div>
+              <div className="text-[9px] text-teal-400 font-bold">🏫 {currentTeacher.className}</div>
+            </div>
+          </div>
+          <div className="flex gap-1">
+            <button
+              onClick={() => setShowLoginModal(true)}
+              className="flex-1 py-1.5 bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 font-extrabold text-[10px] rounded-xl border border-teal-500/40 text-center"
+            >
+              🔐 Chuyển Tài Khoản
+            </button>
+            {currentTeacher.role === "admin" && (
+              <button
+                onClick={() => setShowTeacherMgmtModal(true)}
+                className="px-2 py-1.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 font-extrabold text-[10px] rounded-xl border border-amber-500/40 text-center"
+                title="Quản lý tài khoản toàn trường"
+              >
+                ⚙️ GVCN
+              </button>
+            )}
           </div>
         </div>
       </aside>
 
       {/* MOBILE TOP HEADER */}
-      <header 
+            <header 
         className="md:hidden bg-slate-900 text-white px-4 pb-3 border-b border-slate-800 flex items-center justify-between shrink-0 shadow-lg"
         style={{ paddingTop: 'calc(env(safe-area-inset-top, 44px) + 10px)' }}
       >
         <div className="flex items-center gap-2.5">
-          <img src={teacherProfile.avatar} className="w-9 h-9 rounded-full object-cover border border-teal-400" alt="Teacher" />
+          <img src={currentTeacher.avatarUrl || teacherProfile.avatar} className="w-8 h-8 rounded-full object-cover border border-teal-500" alt="Teacher" />
           <div>
-            <h1 className="font-extrabold text-xs leading-tight">Lớp 9/5_CS5 Sky-Line</h1>
-            <p className="text-[10px] text-teal-400 font-bold">{teacherProfile.name}</p>
+            <h1 className="font-extrabold text-xs text-white leading-none">{currentTeacher.name}</h1>
+            <p className="text-[10px] text-teal-400 font-bold mt-0.5">🏫 {currentTeacher.className}</p>
           </div>
         </div>
-
-        <div className="flex items-center gap-2">
-          <button onClick={() => setShowClassPhotoLightbox(true)} className="p-2 rounded-xl bg-teal-500/20 text-teal-300 text-xs font-bold">📸</button>
-          <button onClick={() => setDarkMode(!darkMode)} className="p-2 rounded-xl bg-slate-800 text-xs">{darkMode ? '☀️' : '🌙'}</button>
-          <button onClick={() => setMobileMenuOpen(true)} className="px-3 py-2 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 font-black text-xs shadow-md">
-            ≡ Menu
+        <div className="flex items-center gap-1.5">
+          <button onClick={() => setShowLoginModal(true)} className="px-2.5 py-1 bg-teal-500/20 text-teal-300 border border-teal-500/40 font-bold text-[10px] rounded-lg">
+            🔐 Đổi Lớp
           </button>
+          {currentTeacher.role === "admin" && (
+            <button onClick={() => setShowTeacherMgmtModal(true)} className="px-2 py-1 bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold text-[10px] rounded-lg">
+              ⚙️
+            </button>
+          )}
         </div>
       </header>
 
@@ -1259,6 +1311,27 @@ export function App() {
             </div>
           </div>
         </div>
+      )}
+
+      
+      {/* LOGIN & CLASS SWITCHER MODAL */}
+      {showLoginModal && (
+        <LoginModal
+          teachers={teachersList}
+          onLogin={handleSwitchTeacher}
+          onClose={() => setShowLoginModal(false)}
+        />
+      )}
+
+      {/* TEACHER MANAGEMENT ADMIN MODAL */}
+      {showTeacherMgmtModal && (
+        <TeacherManagementModal
+          teachers={teachersList}
+          onAddTeacher={handleAddTeacher}
+          onUpdateTeacher={handleUpdateTeacher}
+          onDeleteTeacher={handleDeleteTeacher}
+          onClose={() => setShowTeacherMgmtModal(false)}
+        />
       )}
 
       {/* TKB LIGHTBOX MODAL */}

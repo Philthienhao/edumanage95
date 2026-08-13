@@ -215,3 +215,16 @@ export interface TeacherProfile {
   schoolLogo: string;
   classPhoto?: string;
 }
+
+export interface TeacherUser {
+  id: string;
+  username: string;
+  passwordPlain?: string;
+  name: string;
+  title: string;
+  className: string;
+  classCode: string;
+  avatarUrl: string;
+  role: 'admin' | 'teacher';
+}
+
