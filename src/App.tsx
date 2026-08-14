@@ -609,58 +609,65 @@ export function App() {
           </nav>
         </div>
 
-                <div className="border-t border-slate-800 pt-3 space-y-2">
-          <div className="flex items-center gap-2.5">
-            <img src={currentTeacher.avatarUrl || teacherProfile.avatar} className="w-9 h-9 rounded-full object-cover border border-teal-500 shadow-md" alt="Teacher" />
-            <div className="text-[11px]">
-              <div className="font-bold text-white flex items-center gap-1">
-                <span>{currentTeacher.name}</span>
-                {currentTeacher.role === "admin" && <span className="px-1 py-0.2 bg-amber-500/20 text-amber-300 text-[8px] rounded font-bold">ADMIN</span>}
+                        <div className="border-t border-slate-800 pt-3 space-y-2">
+          <div 
+            onClick={() => setShowLoginModal(true)}
+            className="flex items-center gap-2.5 p-2 bg-slate-800/80 hover:bg-slate-800 rounded-2xl cursor-pointer border border-slate-700/60 transition group shadow-md"
+            title="Nhấp để đổi tài khoản hoặc chọn lớp"
+          >
+            <img src={currentTeacher.avatarUrl || teacherProfile.avatar} className="w-10 h-10 rounded-xl object-cover border-2 border-teal-400 shadow-md group-hover:scale-105 transition" alt="Teacher" />
+            <div className="text-[11px] flex-1">
+              <div className="font-extrabold text-white flex items-center justify-between">
+                <span className="group-hover:text-teal-300 transition">{currentTeacher.name}</span>
+                <span className="text-[10px]">🔓</span>
               </div>
-              <div className="text-[9px] text-teal-400 font-bold">🏫 {currentTeacher.className}</div>
+              <div className="text-[10px] text-teal-400 font-bold">🏫 {currentTeacher.className}</div>
+              <div className="text-[9px] text-amber-300 font-semibold mt-0.5">👉 Đổi tài khoản / Cấp lớp</div>
             </div>
           </div>
-          <div className="flex gap-1">
+
+          <div className="flex gap-1.5 pt-1">
             <button
               onClick={() => setShowLoginModal(true)}
-              className="flex-1 py-1.5 bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 font-extrabold text-[10px] rounded-xl border border-teal-500/40 text-center"
+              className="flex-1 py-2 bg-teal-500 hover:bg-teal-400 text-slate-950 font-black text-xs rounded-xl shadow-md transition text-center flex items-center justify-center gap-1"
             >
-              🔐 Chuyển Tài Khoản
+              <span>🔐</span>
+              <span>ĐỔI TÀI KHOẢN</span>
             </button>
-            {currentTeacher.role === "admin" && (
-              <button
-                onClick={() => setShowTeacherMgmtModal(true)}
-                className="px-2 py-1.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 font-extrabold text-[10px] rounded-xl border border-amber-500/40 text-center"
-                title="Quản lý tài khoản toàn trường"
-              >
-                ⚙️ GVCN
-              </button>
-            )}
+            <button
+              onClick={() => setShowTeacherMgmtModal(true)}
+              className="px-3 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs rounded-xl shadow-md transition text-center flex items-center justify-center gap-1"
+              title="Quản lý tài khoản toàn trường"
+            >
+              <span>⚙️</span>
+              <span>GVCN</span>
+            </button>
           </div>
         </div>
       </aside>
 
       {/* MOBILE TOP HEADER */}
-            <header 
+                  <header 
         className="md:hidden bg-slate-900 text-white px-4 pb-3 border-b border-slate-800 flex items-center justify-between shrink-0 shadow-lg"
-        style={{ paddingTop: 'calc(env(safe-area-inset-top, 44px) + 10px)' }}
+        style={{ paddingTop: "calc(env(safe-area-inset-top, 44px) + 10px)" }}
       >
-        <div className="flex items-center gap-2.5">
-          <img src={currentTeacher.avatarUrl || teacherProfile.avatar} className="w-8 h-8 rounded-full object-cover border border-teal-500" alt="Teacher" />
+        <div onClick={() => setShowLoginModal(true)} className="flex items-center gap-2.5 cursor-pointer">
+          <img src={currentTeacher.avatarUrl || teacherProfile.avatar} className="w-9 h-9 rounded-full object-cover border-2 border-teal-400" alt="Teacher" />
           <div>
-            <h1 className="font-extrabold text-xs text-white leading-none">{currentTeacher.name}</h1>
-            <p className="text-[10px] text-teal-400 font-bold mt-0.5">🏫 {currentTeacher.className}</p>
+            <h1 className="font-extrabold text-xs text-white leading-none flex items-center gap-1">
+              <span>{currentTeacher.name}</span>
+              <span className="text-[10px]">🔓</span>
+            </h1>
+            <p className="text-[10px] text-teal-400 font-bold mt-0.5">🏫 {currentTeacher.className} (Đổi lớp)</p>
           </div>
         </div>
         <div className="flex items-center gap-1.5">
-          <button onClick={() => setShowLoginModal(true)} className="px-2.5 py-1 bg-teal-500/20 text-teal-300 border border-teal-500/40 font-bold text-[10px] rounded-lg">
-            🔐 Đổi Lớp
+          <button onClick={() => setShowLoginModal(true)} className="px-3 py-1.5 bg-teal-500 text-slate-950 font-black text-xs rounded-xl shadow-md">
+            🔐 ĐỔI LỚP
           </button>
-          {currentTeacher.role === "admin" && (
-            <button onClick={() => setShowTeacherMgmtModal(true)} className="px-2 py-1 bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold text-[10px] rounded-lg">
-              ⚙️
-            </button>
-          )}
+          <button onClick={() => setShowTeacherMgmtModal(true)} className="px-2.5 py-1.5 bg-amber-500 text-slate-950 font-black text-xs rounded-xl shadow-md">
+            ⚙️ GVCN
+          </button>
         </div>
       </header>
 
