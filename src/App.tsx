@@ -561,16 +561,18 @@ export function App() {
   });
 
 
-  const navItems = [
-    { id: 'smart_pickup', icon: '⚡', label: 'AI Smart Pickup' },
-    { id: 'dashboard', icon: '🏠', label: 'Dashboard' },
-    { id: 'students', icon: '👨‍🎓', label: `Học sinh (${students.length})` },
-    { id: 'rewards', icon: '🏆', label: `Khen thưởng (${rewards.length})` },
-    { id: 'violations', icon: '⚠️', label: `Vi phạm (${violations.length})` },
-    { id: 'repeated_violations', icon: '🚨', label: `Lỗi >2 lần (${repeatedViolationStudents.length})` },
-    { id: 'academic_decline', icon: '📉', label: `Sa sút hằng tuần (${academicDeclineList.length})` },
-    { id: 'parents', icon: '📞', label: 'Phụ huynh' },
-    { id: 'birthday', icon: '🎂', label: `Sinh nhật (${birthdayStudentsThisMonth.length})` }
+    const navItems = [
+    { id: "smart_pickup", icon: "⚡", label: "AI Smart Pickup" },
+    { id: "dashboard", icon: "🏠", label: "Dashboard" },
+    { id: "switch_account", icon: "🔐", label: "🔐 ĐỔI TÀI KHOẢN / CẤP LỚP" },
+    { id: "admin_teachers", icon: "⚙️", label: "⚙️ QUẢN LÝ GVCN (ADMIN)" },
+    { id: "students", icon: "👨‍🎓", label: `Học sinh (${students.length})` },
+    { id: "rewards", icon: "🏆", label: `Khen thưởng (${rewards.length})` },
+    { id: "violations", icon: "⚠️", label: `Vi phạm (${violations.length})` },
+    { id: "repeated_violations", icon: "🚨", label: `Lỗi >2 lần (${repeatedViolationStudents.length})` },
+    { id: "academic_decline", icon: "📉", label: `Sa sút hằng tuần (${academicDeclineList.length})` },
+    { id: "parents", icon: "📞", label: "Phụ huynh" },
+    { id: "birthday", icon: "🎂", label: `Sinh nhật (${birthdayStudentsThisMonth.length})` }
   ];
 
   return (
@@ -596,11 +598,15 @@ export function App() {
           </div>
 
           <nav className="space-y-1 text-xs font-bold">
-            {navItems.map(item => (
+                        {navItems.map(item => (
               <button
                 key={item.id}
-                onClick={() => setActiveTab(item.id)}
-                className={`w-full text-left px-3.5 py-2.5 rounded-xl transition flex items-center gap-2.5 ${activeTab === item.id ? 'bg-teal-500 text-slate-950 font-extrabold shadow-lg' : 'text-slate-300 hover:bg-slate-800'}`}
+                onClick={() => {
+                  if (item.id === "switch_account") setShowLoginModal(true);
+                  else if (item.id === "admin_teachers") setShowTeacherMgmtModal(true);
+                  else setActiveTab(item.id);
+                }}
+                className={`w-full text-left px-3.5 py-2.5 rounded-xl transition flex items-center gap-2.5 ${activeTab === item.id ? "bg-teal-500 text-slate-950 font-extrabold shadow-lg" : "text-slate-300 hover:bg-slate-800"}`}
               >
                 <span>{item.icon}</span>
                 <span>{item.label}</span>
@@ -691,19 +697,20 @@ export function App() {
               </div>
 
               <nav className="space-y-1.5 font-bold text-xs">
-                {navItems.map(item => (
-                  <button
-                    key={item.id}
-                    onClick={() => { setActiveTab(item.id); setMobileMenuOpen(false); }}
-                    className={`w-full text-left px-4 py-3 rounded-2xl flex items-center justify-between transition ${activeTab === item.id ? 'bg-teal-500 text-slate-950 font-black shadow-lg' : 'text-slate-200 bg-slate-800/80 hover:bg-slate-700'}`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className="text-base">{item.icon}</span>
-                      <span>{item.label}</span>
-                    </div>
-                    {activeTab === item.id && <span className="text-xs">✓</span>}
-                  </button>
-                ))}
+                            {navItems.map(item => (
+              <button
+                key={item.id}
+                onClick={() => {
+                  if (item.id === "switch_account") setShowLoginModal(true);
+                  else if (item.id === "admin_teachers") setShowTeacherMgmtModal(true);
+                  else setActiveTab(item.id);
+                }}
+                className={`w-full text-left px-3.5 py-2.5 rounded-xl transition flex items-center gap-2.5 ${activeTab === item.id ? "bg-teal-500 text-slate-950 font-extrabold shadow-lg" : "text-slate-300 hover:bg-slate-800"}`}
+              >
+                <span>{item.icon}</span>
+                <span>{item.label}</span>
+              </button>
+            ))}
               </nav>
             </div>
 
