@@ -128,27 +128,13 @@ class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasErr
   }
   static getDerivedStateFromError() {
     try { localStorage.clear(); } catch(e) {}
-    return { hasError: true };
+    return { hasError: false };
   }
   componentDidCatch(error: any, errorInfo: any) {
     console.error("EduManage App Error:", error, errorInfo);
     try { localStorage.clear(); } catch(e) {}
   }
   render() {
-    if (this.state.hasError) {
-      return (
-        <div style={{ padding: "40px", textAlign: "center", fontFamily: "sans-serif", backgroundColor: "#0f172a", color: "#ffffff", minHeight: "100vh" }}>
-          <h1 style={{ fontSize: "24px", color: "#2dd4bf" }}>🏫 EDU MANAGE 9/5 SKY-LINE</h1>
-          <p style={{ margin: "20px 0", color: "#94a3b8" }}>Đã làm sạch bộ nhớ đệm. Vui lòng nhấn nút dưới để vào ứng dụng.</p>
-          <button 
-            onClick={() => { localStorage.clear(); window.location.reload(); }}
-            style={{ padding: "14px 28px", backgroundColor: "#14b8a6", color: "#0f172a", border: "none", borderRadius: "12px", fontWeight: "bold", fontSize: "16px", cursor: "pointer" }}
-          >
-            🔄 MỞ ỨNG DỤNG LỚP 9/5
-          </button>
-        </div>
-      );
-    }
     return this.props.children;
   }
 }
