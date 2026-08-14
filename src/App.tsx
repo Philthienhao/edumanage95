@@ -739,7 +739,15 @@ export function App() {
             />
           </div>
 
-          <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2">
+            <button onClick={() => setShowLoginModal(true)} className="px-3 py-1.5 bg-teal-500 text-slate-950 font-black text-xs rounded-xl shadow-md hover:bg-teal-400 transition flex items-center gap-1">
+              <span>🔐</span> <span>ĐỔI TÀI KHOẢN / CẤP LỚP</span>
+            </button>
+            {currentTeacher.role === "admin" && (
+              <button onClick={() => setShowTeacherMgmtModal(true)} className="px-3 py-1.5 bg-amber-500 text-slate-950 font-black text-xs rounded-xl shadow-md hover:bg-amber-400 transition flex items-center gap-1">
+                <span>⚙️</span> <span>QUẢN LÝ GVCN</span>
+              </button>
+            )}
             <button onClick={() => setShowClassPhotoLightbox(true)} className="px-3 py-1.5 bg-teal-500/20 text-teal-700 dark:text-teal-300 font-extrabold text-xs rounded-xl border border-teal-500/30">
               📸 Ảnh Lớp
             </button>
