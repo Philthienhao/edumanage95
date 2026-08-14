@@ -140,6 +140,39 @@ class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasErr
 }
 
 export default function App() {
+  const [teachersList, setTeachersList] = useState<TeacherUser[]>(() => {
+    try {
+      const saved = localStorage.getItem("EDUMANAGE_TEACHERS_LIST");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch(e) {}
+    return initialTeachers;
+  });
+
+  const [currentTeacher, setCurrentTeacher] = useState<TeacherUser>(() => {
+    try {
+      const saved = localStorage.getItem("EDUMANAGE_CURRENT_TEACHER");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed && parsed.name && parsed.classCode) return parsed;
+      }
+    } catch(e) {}
+    return initialTeachers[0];
+  });
+
+  const [showLoginModal, setShowLoginModal] = useState<boolean>(false);
+  const [showTeacherMgmtModal, setShowTeacherMgmtModal] = useState<boolean>(false);
+
+  useEffect(() => {
+    try { localStorage.setItem("EDUMANAGE_TEACHERS_LIST", JSON.stringify(teachersList)); } catch(e) {}
+  }, [teachersList]);
+
+  useEffect(() => {
+    try { localStorage.setItem("EDUMANAGE_CURRENT_TEACHER", JSON.stringify(currentTeacher)); } catch(e) {}
+  }, [currentTeacher]);
+
   const [activeTab, setActiveTab] = useState<string>('smart_pickup');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [showClassPhotoLightbox, setShowClassPhotoLightbox] = useState<boolean>(false);
@@ -205,7 +238,7 @@ export default function App() {
 
     // ☁️ REAL-TIME 2-WAY CLOUD SYNC ENGINE (iPhone 📱 ⇄ Laptop 💻)
   const GITHUB_TOKEN = "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";
-  const GITHUB_REPO_API = `https://api.github.com/repos/Philthienhao/edumanage95/contents/cloud_data_${currentTeacher.classCode}.json`;
+  const GITHUB_REPO_API = `https://api.github.com/repos/Philthienhao/edumanage95/contents/cloud_data_${currentTeacher?.classCode || 'CLASS_95'}.json`;
 
   const [syncStatus, setSyncStatus] = useState<"synced" | "syncing" | "offline">("synced");
   const [lastSyncedTime, setLastSyncedTime] = useState<string>("");
