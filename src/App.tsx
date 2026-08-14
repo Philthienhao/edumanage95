@@ -139,7 +139,7 @@ class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasErr
   }
 }
 
-export function App() {
+export default function App() {
   const [activeTab, setActiveTab] = useState<string>('smart_pickup');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [showClassPhotoLightbox, setShowClassPhotoLightbox] = useState<boolean>(false);
@@ -1371,12 +1371,4 @@ export function App() {
   );
 }
 
-export default function AppRoot() {
-  return (
-    <ErrorBoundary>
-      <AppProvider>
-        <App />
-      </AppProvider>
-    </ErrorBoundary>
-  );
-}
+
