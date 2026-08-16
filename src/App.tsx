@@ -452,6 +452,25 @@ export default function App() {
     alert(`💾 Đã lưu ghi chú đặc điểm riêng của học sinh ${selectedStudent.fullName}!`);
   };
 
+  
+  const handleOpenAddRewardForStudent = (st: any) => {
+    const todayStr = new Date().toISOString().split("T")[0];
+    setRewardForm({ studentId: st.id, reason: "", bonusPoints: 10, date: todayStr });
+    setShowAddRewardModal(true);
+  };
+
+  const handleOpenAddViolationForStudent = (st: any) => {
+    const todayStr = new Date().toISOString().split("T")[0];
+    setViolationForm({ studentId: st.id, type: "Nề nếp", severity: "Nhẹ", description: "", date: todayStr });
+    setShowAddViolationModal(true);
+  };
+
+  const handleOpenAddDeclineForStudent = (st: any) => {
+    const todayStr = new Date().toISOString().split("T")[0];
+    setDeclineForm({ studentId: st.id, subject: "Toán", reason: "", date: todayStr });
+    setShowAddDeclineModal(true);
+  };
+
   const handleSaveReward = (e: React.FormEvent) => {
     e.preventDefault();
     const st = students.find((s: any) => s.id === rewardForm.studentId);
@@ -911,6 +930,33 @@ export default function App() {
                           <span className="line-clamp-2"><strong>Đặc điểm:</strong> {s.privateNote}</span>
                         </div>
                       )}
+
+                      {/* ⚡ DIRECT REWARD & VIOLATION BUTTONS ON EACH STUDENT CARD */}
+                      <div className="mt-3 pt-2.5 border-t border-slate-200 dark:border-slate-700/60 flex items-center justify-between gap-1.5" onClick={e => e.stopPropagation()}>
+                        <button
+                          onClick={() => handleOpenAddRewardForStudent(s)}
+                          className="flex-1 py-1.5 px-2 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-[10px] rounded-xl shadow-sm flex items-center justify-center gap-1 transition"
+                          title="Tuyên dương khen thưởng học sinh này"
+                        >
+                          <span>🏆</span>
+                          <span>+ Khen</span>
+                        </button>
+                        <button
+                          onClick={() => handleOpenAddViolationForStudent(s)}
+                          className="flex-1 py-1.5 px-2 bg-rose-600 hover:bg-rose-500 text-white font-extrabold text-[10px] rounded-xl shadow-sm flex items-center justify-center gap-1 transition"
+                          title="Ghi nhận vi phạm học sinh này"
+                        >
+                          <span>⚠️</span>
+                          <span>+ Vi Phạm</span>
+                        </button>
+                        <button
+                          onClick={() => handleOpenAddDeclineForStudent(s)}
+                          className="px-2 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-[10px] rounded-xl shadow-sm flex items-center justify-center gap-1 transition"
+                          title="Ghi nhận sa sút học tập"
+                        >
+                          <span>📉</span>
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -1320,6 +1366,82 @@ export default function App() {
                   <div className="text-xs text-teal-400 font-bold">Mẹ: {(selectedStudent && selectedStudent.family ? selectedStudent.family.motherName : "")} ({(selectedStudent && selectedStudent.family ? selectedStudent.family.motherPhone : "")})</div>
                   <div className="text-xs text-slate-200 font-semibold">🏠 <strong>Địa chỉ nhà:</strong> {selectedStudent.address}</div>
                 </div>
+              </div>
+
+                            {/* 🏆 & ⚠️ DIRECT QUICK ACTION BAR INSIDE MODAL */}
+              <div className="flex flex-wrap items-center gap-2 p-3 bg-slate-950/80 rounded-2xl border border-slate-800">
+                <span className="text-xs font-bold text-slate-300 w-full sm:w-auto">Thêm nhanh trực tiếp:</span>
+                <button
+                  onClick={() => handleOpenAddRewardForStudent(selectedStudent)}
+                  className="flex-1 py-2 px-3 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs rounded-xl shadow-md flex items-center justify-center gap-1.5"
+                >
+                  <span>🏆</span> <span>+ KHEN THƯỞNG</span>
+                </button>
+                <button
+                  onClick={() => handleOpenAddViolationForStudent(selectedStudent)}
+                  className="flex-1 py-2 px-3 bg-rose-600 hover:bg-rose-500 text-white font-black text-xs rounded-xl shadow-md flex items-center justify-center gap-1.5"
+                >
+                  <span>⚠️</span> <span>+ VI PHẠM</span>
+                </button>
+                <button
+                  onClick={() => handleOpenAddDeclineForStudent(selectedStudent)}
+                  className="py-2 px-3 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs rounded-xl shadow-md flex items-center justify-center gap-1.5"
+                >
+                  <span>📉</span> <span>+ SA SÚT</span>
+                </button>
+              </div>
+
+              {/* 🏆 STUDENT REWARDS HISTORY */}
+              <div className="bg-slate-950/60 p-4 rounded-2xl border border-slate-800 space-y-2">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-extrabold text-xs text-emerald-400 flex items-center gap-1">
+                    <span>🏆 LỊCH SỬ KHEN THƯỞNG</span>
+                    <span>({rewards.filter((r: any) => r.studentId === selectedStudent.id).length})</span>
+                  </h4>
+                  <button onClick={() => handleOpenAddRewardForStudent(selectedStudent)} className="text-[10px] text-emerald-300 font-extrabold hover:underline">+ Thêm Khen</button>
+                </div>
+                {rewards.filter((r: any) => r.studentId === selectedStudent.id).length === 0 ? (
+                  <p className="text-[11px] text-slate-500 italic">Chưa ghi nhận lượt khen thưởng nào.</p>
+                ) : (
+                  <div className="space-y-1.5">
+                    {rewards.filter((r: any) => r.studentId === selectedStudent.id).map((r: any) => (
+                      <div key={r.id} className="p-2.5 bg-emerald-500/10 rounded-xl border border-emerald-500/30 flex items-center justify-between text-xs">
+                        <div>
+                          <div className="font-bold text-emerald-300">{r.reason}</div>
+                          <div className="text-[10px] text-slate-400">📅 {r.date} • <strong className="text-emerald-400">+{r.bonusPoints} điểm</strong></div>
+                        </div>
+                        <button onClick={() => handleDeleteReward(r.id)} className="p-1 text-rose-400 hover:text-rose-300 font-bold text-xs">🗑️</button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* ⚠️ STUDENT VIOLATIONS HISTORY */}
+              <div className="bg-slate-950/60 p-4 rounded-2xl border border-slate-800 space-y-2">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-extrabold text-xs text-rose-400 flex items-center gap-1">
+                    <span>⚠️ LỊCH SỬ VI PHẠM NỀ NẾP</span>
+                    <span>({violations.filter((v: any) => v.studentId === selectedStudent.id).length})</span>
+                  </h4>
+                  <button onClick={() => handleOpenAddViolationForStudent(selectedStudent)} className="text-[10px] text-rose-300 font-extrabold hover:underline">+ Thêm Vi Phạm</button>
+                </div>
+                {violations.filter((v: any) => v.studentId === selectedStudent.id).length === 0 ? (
+                  <p className="text-[11px] text-slate-500 italic">Học sinh chấp hành tốt nề nếp, không có vi phạm.</p>
+                ) : (
+                  <div className="space-y-1.5">
+                    {violations.filter((v: any) => v.studentId === selectedStudent.id).map((v: any) => (
+                      <div key={v.id} className="p-2.5 bg-rose-500/10 rounded-xl border border-rose-500/30 flex items-center justify-between text-xs">
+                        <div>
+                          <div className="font-bold text-rose-300">{v.type} ({v.severity})</div>
+                          <p className="text-[11px] text-slate-300">{v.description}</p>
+                          <div className="text-[10px] text-slate-400">📅 {v.date}</div>
+                        </div>
+                        <button onClick={() => handleDeleteViolation(v.id)} className="p-1 text-rose-400 hover:text-rose-300 font-bold text-xs">🗑️</button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* 📌 DEDICATED PRIVATE NOTE SECTION */}
